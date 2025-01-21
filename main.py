@@ -50,7 +50,7 @@ if __name__ == "__main__":
     print(f"PyTorch version: {torch.__version__}")
     
     # Load and process image
-    image_path = 'Assets/bird.jpg'
+    image_path = 'Assets/bird.png'
     print(f"Debug: Loading image from {image_path}")
     image = cv2.imread(image_path)
     
