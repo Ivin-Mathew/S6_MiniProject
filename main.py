@@ -57,6 +57,19 @@ def remove_background(image, depth_map, threshold=0.5):
     
     return result
 
+
+
+def point_cloud_to_mesh(pcd, method="poisson"):
+    """
+    Convert a point cloud to a mesh using Poisson or Ball-Pivoting Algorithm.
+    :param pcd: Open3D point cloud object
+    :param method: "poisson" or "bpa" (Ball-Pivoting Algorithm)
+    :return: Open3D triangle mesh object
+    """
+    
+    pass
+
+
 def create_point_cloud(image, depth_map):
     h, w = depth_map.shape
     # Normalize depth map for better visualization and point cloud generation
@@ -129,3 +142,8 @@ if __name__ == "__main__":
 
     # Visualize point cloud in Open3D
     o3d.visualization.draw_geometries([pcd])
+    
+    
+    mesh = point_cloud_to_mesh(pcd)
+    o3d.visualization.draw_geometries([mesh])
+    
