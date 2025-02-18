@@ -2,17 +2,14 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import sys
 import open3d as o3d
-
-def plot(image, index, title):
-    plt.subplot(1, 2, index)
-    plt.imshow(image)
-    plt.title(title)
+import sys
+import traceback
 
 def sharpen_image(image):
     sharpening_kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
     sharpened = cv2.filter2D(image, -1, sharpening_kernel)
+    smoothed = cv2.GaussianBlur(sharpened, (3, 3), 0)
     return sharpened
 
 def get_depth_map(image):
@@ -40,55 +37,23 @@ def get_depth_map(image):
     output = prediction.cpu().numpy()
     return output
 
-def remove_background(image, depth_map, threshold=0.5):
-
-    # Normalize depth map
-    depth_map = cv2.normalize(depth_map, None, 0, 1, cv2.NORM_MINMAX)
-
-    # Create a binary mask for foreground (closer objects)
-    mask = depth_map > threshold  # Keep closer objects
-
-    # Convert the mask to a 3-channel mask
-    mask = np.stack([mask] * 3, axis=-1)
-
-    # Apply the mask to retain only the foreground
-    result = np.zeros_like(image)
-    result[mask] = image[mask]
-    return result
-
-
-
-def point_cloud_to_mesh(pcd, method="poisson"):
-    """
-    Convert a point cloud to a mesh using Poisson or Ball-Pivoting Algorithm.
-    :param pcd: Open3D point cloud object
-    :param method: "poisson" or "bpa" (Ball-Pivoting Algorithm)
-    :return: Open3D triangle mesh object
-    """
-    pass
-
-
 def create_point_cloud(image, depth_map):
     h, w = depth_map.shape
     # Normalize depth map for better visualization and point cloud generation
     depth_normalized = (depth_map - depth_map.min()) / (depth_map.max() - depth_map.min())
+    
     # Create point cloud
     points = []
     colors = []
-    black_threshold = 10  # Define the threshold for black pixels
-    
     for v in range(h):
         for u in range(w):
-            r, g, b = image[v, u]
-            # Ignore black pixels (background)
-            if r < black_threshold and g < black_threshold and b < black_threshold:
-                continue  # Skip black pixels
-
             z = depth_normalized[v, u]  # Use normalized depth as z-coordinate
             x = (u - w / 2) / w  # Normalize x and y to be between -0.5 and 0.5 for better visualization
             y = (v - h / 2) / h
             points.append([x, y, z])
-            colors.append([r / 255, g / 255, b / 255])  # Normalize RGB values
+            # Use image color for point color
+            r, g, b = image[v, u]
+            colors.append([r / 255, g / 255, b / 255])
 
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(np.array(points))
@@ -97,9 +62,16 @@ def create_point_cloud(image, depth_map):
     return pcd
 
 
-
 if __name__ == "__main__":
-    image_path = 'Assets/bird.png'
+    # ... (Image loading and depth map generation as before) ...
+    
+    print(f"OpenCV version: {cv2.__version__}")
+    print(f"NumPy version: {np.__version__}")
+    print(f"PyTorch version: {torch.__version__}")
+    
+    # Load and process image
+    image_path = 'Assets/cat.jpg'
+    print(f"Debug: Loading image from {image_path}")
     image = cv2.imread(image_path)
     
     if image is None:
@@ -107,7 +79,7 @@ if __name__ == "__main__":
     
     print(f"Debug: Image loaded successfully, shape: {image.shape}")
     
-    # Resize if too large
+    # Optionally resize image if it's too large
     max_dimension = 640
     if max(image.shape) > max_dimension:
         scale = max_dimension / max(image.shape[0], image.shape[1])
@@ -115,31 +87,28 @@ if __name__ == "__main__":
         image = cv2.resize(image, new_size)
         print(f"Debug: Resized image to {image.shape}")
     
-    # Convert BGR to RGB
+    # Convert BGR to RGB and process
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     print("Debug: Converting color space and sharpening")
     image = sharpen_image(image)
     
     # Generate depth map
     print("Debug: Generating depth map")
-    depth_map = get_depth_map(image)
-    print(f"Debug: Depth map generated, shape: {depth_map.shape}")
- 
-    # Remove background using depth map
-    output_image = remove_background(image, depth_map, threshold=0.5)
-    depth_output_image = get_depth_map(output_image)
-   
-    # Visualize results
-    plt.figure(figsize=(10, 5))
-    plot(output_image, 1, "No Background")
-    plt.show()
+    depth_image = get_depth_map(image)
+    print(f"Debug: Depth map generated, shape: {depth_image.shape}")
     
+    # Visualize depth map
+    plt.figure(figsize=(10, 5))
+    plt.subplot(1, 2, 1)
+    plt.imshow(image)
+    plt.title("Original Image")
+    plt.subplot(1, 2, 2)
+    plt.imshow(depth_image, cmap='plasma')
+    plt.title("Depth Map")
+    plt.colorbar()
+    plt.show()
     # Create point cloud
-    pcd = create_point_cloud(output_image, depth_output_image)
+    pcd = create_point_cloud(image, depth_image)
 
     # Visualize point cloud in Open3D
     o3d.visualization.draw_geometries([pcd])
-    
-    
-    mesh = point_cloud_to_mesh(pcd)
-    o3d.visualization.draw_geometries([mesh])
