@@ -13,7 +13,7 @@ def sharpen_image(image):
     return sharpened
 
 def get_depth_map(image):
-    model_type = "MiDaS_small"
+    model_type = "DPT_Hybrid"
     midas = torch.hub.load("intel-isl/MiDaS", model_type)
     
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
