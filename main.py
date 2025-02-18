@@ -54,7 +54,6 @@ def remove_background(image, depth_map, threshold=0.5):
     # Apply the mask to retain only the foreground
     result = np.zeros_like(image)
     result[mask] = image[mask]
-    
     return result
 
 
@@ -66,7 +65,6 @@ def point_cloud_to_mesh(pcd, method="poisson"):
     :param method: "poisson" or "bpa" (Ball-Pivoting Algorithm)
     :return: Open3D triangle mesh object
     """
-    
     pass
 
 
@@ -74,7 +72,6 @@ def create_point_cloud(image, depth_map):
     h, w = depth_map.shape
     # Normalize depth map for better visualization and point cloud generation
     depth_normalized = (depth_map - depth_map.min()) / (depth_map.max() - depth_map.min())
-    
     # Create point cloud
     points = []
     colors = []
@@ -127,11 +124,11 @@ if __name__ == "__main__":
     print("Debug: Generating depth map")
     depth_map = get_depth_map(image)
     print(f"Debug: Depth map generated, shape: {depth_map.shape}")
-    
+ 
     # Remove background using depth map
     output_image = remove_background(image, depth_map, threshold=0.5)
     depth_output_image = get_depth_map(output_image)
-    
+   
     # Visualize results
     plt.figure(figsize=(10, 5))
     plot(output_image, 1, "No Background")
@@ -146,4 +143,3 @@ if __name__ == "__main__":
     
     mesh = point_cloud_to_mesh(pcd)
     o3d.visualization.draw_geometries([mesh])
-    
