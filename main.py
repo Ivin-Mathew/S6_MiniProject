@@ -24,7 +24,7 @@ def get_depth_map(image):
     midas.eval()
     
     midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
-    transform = midas_transforms.small_transform
+    transform = midas_transforms.small_transformn
     
     input_batch = transform(image).to(device)
     
