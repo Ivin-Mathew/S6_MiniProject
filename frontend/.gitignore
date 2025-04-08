@@ -16,3 +16,7 @@ playground-temp
 temp
 TODOs.md
 .eslintcache
+
+*.obj
+*.mtl
+*.png

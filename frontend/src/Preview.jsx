@@ -42,7 +42,7 @@ const Preview = () => {
 
     // Scene setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x111111);
+    scene.background = new THREE.Color(0xffffff);
     sceneRef.current = scene;
 
     // Camera setup
