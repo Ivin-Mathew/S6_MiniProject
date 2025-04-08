@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 import os
 from .voxel_processing.main import process_image  # Import the refactored function
 
 app = Flask(__name__)
+CORS(app)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), 'output')
@@ -52,11 +54,12 @@ def process_image_endpoint():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-    # Return the generated files
+    # Construct the full URLs for the generated files
+    base_url = request.host_url.rstrip('/')  # Get the base URL of the backend
     return jsonify({
-        'obj': f'/download/{os.path.basename(obj_path)}',
-        'mtl': f'/download/{os.path.basename(mtl_path)}',
-        'texture': f'/download/{os.path.basename(texture_path)}'
+        'obj': f'{base_url}/download/{os.path.basename(obj_path)}',
+        'mtl': f'{base_url}/download/{os.path.basename(mtl_path)}',
+        'texture': f'{base_url}/download/{os.path.basename(texture_path)}'
     })
 
 @app.route('/download/<filename>', methods=['GET'])
