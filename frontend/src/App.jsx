@@ -6,6 +6,7 @@ import { Progress } from "./components/ui/progress";
 import { Alert, AlertDescription } from "./components/ui/alert";
 import { Upload, Image as ImageIcon, ArrowRight } from "lucide-react";
 import ImageUploader from "./components/imageLoader";
+import { uploadImage } from "./utils/api"; // Import the API utility
 
 function App() {
   const [image, setImage] = useState(null);
@@ -13,29 +14,42 @@ function App() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (image) {
-      // Simulate upload progress
       setUploading(true);
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 5;
-        setUploadProgress(progress);
-        if (progress >= 100) {
-          clearInterval(interval);
-          setTimeout(() => {
-            navigate("/preview", { state: { image } });
-          }, 500);
+      setUploadProgress(0);
+  
+      const formData = new FormData();
+      formData.append("image", image);
+  
+      try {
+        const response = await fetch("http://127.0.0.1:5000/process-image", {
+          method: "POST",
+          body: formData,
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
         }
-      }, 100);
+  
+        const data = await response.json();
+        console.log("API Response:", data);
+  
+        // Navigate to the preview page with the API response
+        navigate("/preview", { state: { apiResponse: data } });
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Failed to process the image. Please try again.");
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
   return (
-    
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black to-gray-600 p-4">
-      <Card className="w-full max-w-lg bg-transparent" >
-        <CardHeader className="bg-gradient-to-r  rounded-t-lg text-white">
+      <Card className="w-full max-w-lg bg-transparent">
+        <CardHeader className="bg-gradient-to-r rounded-t-lg text-white">
           <div className="flex items-center gap-2">
             <div>
               <CardTitle className="text-2xl font-bold">2D to 3D Reconstruction</CardTitle>
@@ -43,7 +57,7 @@ function App() {
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent className="p-6 space-y-6">
           <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
             <div className="flex items-start space-x-2">
@@ -53,11 +67,11 @@ function App() {
               </div>
             </div>
           </div>
-          
+
           <div className="border-2 border-dashed border-blue-200 rounded-xl p-8 flex items-center justify-center">
             <ImageUploader setImage={setImage} />
           </div>
-          
+
           {image && (
             <Alert className="bg-green-50 border-green-200">
               <AlertDescription className="text-green-800 flex items-center gap-2">
@@ -66,7 +80,7 @@ function App() {
               </AlertDescription>
             </Alert>
           )}
-          
+
           {uploading && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-500">
@@ -77,12 +91,12 @@ function App() {
             </div>
           )}
         </CardContent>
-        
+
         <CardFooter className="flex justify-between p-6 pt-0">
           <Button variant="outline" disabled={uploading}>
             Cancel
           </Button>
-          <Button 
+          <Button
             className="bg-blue-600 hover:bg-blue-700 gap-1"
             onClick={handleSubmit}
             disabled={!image || uploading}

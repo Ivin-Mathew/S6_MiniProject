@@ -10,12 +10,8 @@ const ImageUploader = ({ setImage }) => {
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setLocalImage(reader.result);
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setLocalImage(URL.createObjectURL(file)); // Use URL.createObjectURL for preview
+      setImage(file); // Pass the file object to the parent component
     }
   };
 
