@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import open3d as o3d
+import os
 
 def plot(image, index, title):
     plt.subplot(1, 2, index)
@@ -75,41 +76,42 @@ def export_mesh_to_obj(mesh, file_name, texture=None):
 
     Args:
         mesh (o3d.geometry.TriangleMesh): The mesh to export.
-        file_name (str): The name to save the OBJ file (without extension).
+        file_name (str): The full path (without extension) to save the OBJ file.
         texture (np.ndarray, optional): The texture image to save alongside the OBJ file.
     """
     obj_file = f"{file_name}.obj"
     mtl_file = f"{file_name}.mtl"
     texture_file = f"{file_name}.png"
 
+    mesh.compute_vertex_normals()
     # Save the mesh to an OBJ file
-    o3d.io.write_triangle_mesh(f"output/{obj_file}", mesh, write_triangle_uvs=True)
+    o3d.io.write_triangle_mesh(obj_file, mesh, write_triangle_uvs=True)
 
     # If a texture is provided, save it and create the MTL file
     if texture is not None:
         import cv2
-        cv2.imwrite(f"output/{texture_file}", texture)
-        print(f"Texture saved to output/{texture_file}")
+        cv2.imwrite(texture_file, texture)
+        print(f"Texture saved to {texture_file}")
 
         # Create the MTL file
-        with open(f"output/{mtl_file}", "w") as mtl:
+        with open(mtl_file, "w") as mtl:
             mtl.write(f"newmtl material_0\n")
             mtl.write(f"Ka 1.000 1.000 1.000\n")
             mtl.write(f"Kd 1.000 1.000 1.000\n")
             mtl.write(f"Ks 0.000 0.000 0.000\n")
             mtl.write(f"d 1.0\n")
             mtl.write(f"illum 2\n")
-            mtl.write(f"map_Kd {texture_file}\n")
-        print(f"MTL file saved to output/{mtl_file}")
+            mtl.write(f"map_Kd {os.path.basename(texture_file)}\n")
+        print(f"MTL file saved to {mtl_file}")
 
         # Update the OBJ file to reference the MTL file
-        with open(f"output/{obj_file}", "r") as obj:
+        with open(obj_file, "r") as obj:
             obj_data = obj.readlines()
-        with open(f"output/{obj_file}", "w") as obj:
-            obj.write(f"mtllib {mtl_file}\n")
+        with open(obj_file, "w") as obj:
+            obj.write(f"mtllib {os.path.basename(mtl_file)}\n")
             obj.writelines(obj_data)
 
-    print(f"Mesh exported to output/{obj_file}")
+    print(f"Mesh exported to {obj_file}")
     
 def voxel_grid_to_cube_mesh(voxel_grid):
     """
