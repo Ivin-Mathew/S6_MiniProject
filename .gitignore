@@ -1,1 +1,4 @@
 extras
+__pycache__
+uploads
+output
