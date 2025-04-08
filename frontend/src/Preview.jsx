@@ -24,8 +24,8 @@ const Preview = () => {
   const canvasRef = useRef(null);
   const [isWireframe, setIsWireframe] = useState(false);
   const [transformMode, setTransformMode] = useState("translate"); // 'translate', 'rotate', 'scale'
-  const [currentObject, setCurrentObject] = useState("../../../backend/output/mesh.obj");
-  const [currentMaterial, setCurrentMaterial] = useState("../../../backend/output/mesh.mtl");
+  const [currentObject, setCurrentObject] = useState("assets/output/mesh.obj");
+  const [currentMaterial, setCurrentMaterial] = useState("assets/output/mesh.mtl");
   const [loadingStatus, setLoadingStatus] = useState("Loading model...");
   const [loadingError, setLoadingError] = useState(null);
 
@@ -90,17 +90,17 @@ const Preview = () => {
 
     const mtlLoader = new MTLLoader();
     // Set the texture path for the MTL loader
-    mtlLoader.setPath("./assets/");
+    
 
     mtlLoader.load(
-      currentMaterial.split("/").pop(), // Just use the filename, since we set the path above
+      currentMaterial, // Just use the filename, since we set the path above
       function (materials) {
         materials.preload();
         materialsRef.current = materials;
 
         // Explicitly load and apply the texture - important addition
         const textureLoader = new THREE.TextureLoader();
-        textureLoader.setPath("../../../backend/output/");
+        textureLoader.setPath("/");
         const texture = textureLoader.load(
           "mesh.png",
           (loadedTexture) => {
@@ -135,10 +135,10 @@ const Preview = () => {
         // After loading materials, load the OBJ file
         const objLoader = new OBJLoader();
         objLoader.setMaterials(materials);
-        objLoader.setPath("../assets/"); // Set the path for OBJ loader too
+        // objLoader.setPath("../assets/"); // Set the path for OBJ loader too
 
         objLoader.load(
-          currentObject.split("/").pop(), // Just use the filename
+          currentObject, // Just use the filename
           function (object) {
             // Success callback - rest of your code remains the same
             object.traverse(function (child) {
@@ -261,7 +261,7 @@ const Preview = () => {
           object.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
               child.material = new THREE.MeshStandardMaterial({
-                color: 0x888888,
+                color: 0xffffff,
                 wireframe: isWireframe
               });
             }
