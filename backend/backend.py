@@ -7,7 +7,10 @@ app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
-OUTPUT_FOLDER = os.path.join(os.path.dirname(__file__), 'output')
+# Construct the path to the frontend's public/output folder
+FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'frontend'))
+OUTPUT_FOLDER = os.path.join(FRONTEND_DIR, 'src', 'assets', 'output')
+
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
