@@ -24,7 +24,7 @@ def get_depth_map(image):
     midas.eval()
     
     midas_transforms = torch.hub.load("intel-isl/MiDaS", "transforms")
-    transform = midas_transforms.small_transformn
+    transform = midas_transforms.small_transform
     
     input_batch = transform(image).to(device)
     
@@ -75,7 +75,7 @@ def create_point_cloud(image, depth_map):
     # Create point cloud
     points = []
     colors = []
-    black_threshold = 10  # Define the threshold for black pixels
+    black_threshold = 0  # Define the threshold for black pixels
     
     for v in range(h):
         for u in range(w):
@@ -87,7 +87,7 @@ def create_point_cloud(image, depth_map):
             z = depth_normalized[v, u]  # Use normalized depth as z-coordinate
             x = (u - w / 2) / w  # Normalize x and y to be between -0.5 and 0.5 for better visualization
             y = (v - h / 2) / h
-            points.append([x, y, z])
+            points.append([x, y, -z])
             colors.append([r / 255, g / 255, b / 255])  # Normalize RGB values
 
     pcd = o3d.geometry.PointCloud()
@@ -99,7 +99,7 @@ def create_point_cloud(image, depth_map):
 
 
 if __name__ == "__main__":
-    image_path = 'Assets/bird.png'
+    image_path = '../Assets/1.webp'
     image = cv2.imread(image_path)
     
     if image is None:

@@ -50,7 +50,7 @@ def create_point_cloud(image, depth_map):
             z = depth_normalized[v, u]  # Use normalized depth as z-coordinate
             x = (u - w / 2) / w  # Normalize x and y to be between -0.5 and 0.5 for better visualization
             y = (v - h / 2) / h
-            points.append([x, y, z])
+            points.append([x, y, -z])
             # Use image color for point color
             r, g, b = image[v, u]
             colors.append([r / 255, g / 255, b / 255])
@@ -70,7 +70,7 @@ if __name__ == "__main__":
     print(f"PyTorch version: {torch.__version__}")
     
     # Load and process image
-    image_path = '../Assets/cat.jpg'
+    image_path = '../Assets/1.webp'
     print(f"Debug: Loading image from {image_path}")
     image = cv2.imread(image_path)
     

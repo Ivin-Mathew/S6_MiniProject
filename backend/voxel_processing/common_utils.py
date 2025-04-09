@@ -62,7 +62,7 @@ def create_point_cloud(image, depth_map):
             z = depth_normalized[v, u]
             x = (u - w / 2) / w
             y = (v - h / 2) / h
-            points.append([x, y, z])
+            points.append([x, y, -z])
             colors.append([r / 255, g / 255, b / 255])
 
     pcd = o3d.geometry.PointCloud()

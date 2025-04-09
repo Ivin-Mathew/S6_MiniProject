@@ -120,7 +120,7 @@ def voxel_grid_to_mesh(voxel_grid):
     return mesh
 
 if __name__ == "__main__":
-    image_path = 'Assets/cat.jpg'
+    image_path = '../Assets/1.webp'
     image = cv2.imread(image_path)
 
     if image is None:
